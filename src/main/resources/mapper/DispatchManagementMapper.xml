@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.logistics.repository.DispatchManagementRepository">
+    <resultMap id="dispatchResultMap" type="com.logistics.entity.DispatchManagement">
+        <id property="id" column="id"/>
+        <result property="orderid" column="orderid"/>
+        <result property="vehicleid" column="vehicleid"/>
+        <result property="driverid" column="driverid"/>
+        <result property="task" column="task"/>
+        <result property="driverName" column="driver_name"/>
+        <result property="licensePlate" column="license_plate"/>
+        <result property="orderStatus" column="order_status"/>
+    </resultMap>
+    
+    <select id="findAll" resultMap="dispatchResultMap">
+        SELECT * FROM dispatch_management
+    </select>
+    
+    <select id="findAllWithDetails" resultMap="dispatchResultMap">
+        SELECT dm.*, u.username as driver_name, v.license_plate, o.order_status
+        FROM dispatch_management dm
+        LEFT JOIN user u ON dm.driverid = u.id
+        LEFT JOIN vehicle v ON dm.vehicleid = v.id
+        LEFT JOIN `order` o ON dm.orderid = o.id
+    </select>
+    
+    <select id="findById" resultMap="dispatchResultMap">
+        SELECT dm.*, u.username as driver_name, v.license_plate, o.order_status
+        FROM dispatch_management dm
+        LEFT JOIN user u ON dm.driverid = u.id
+        LEFT JOIN vehicle v ON dm.vehicleid = v.id
+        LEFT JOIN `order` o ON dm.orderid = o.id
+        WHERE dm.id = #{id}
+    </select>
+    
+    <select id="findByOrderId" resultMap="dispatchResultMap">
+        SELECT dm.*, u.username as driver_name, v.license_plate, o.order_status
+        FROM dispatch_management dm
+        LEFT JOIN user u ON dm.driverid = u.id
+        LEFT JOIN vehicle v ON dm.vehicleid = v.id
+        LEFT JOIN `order` o ON dm.orderid = o.id
+        WHERE dm.orderid = #{orderId}
+    </select>
+    
+    <insert id="insert" parameterType="com.logistics.entity.DispatchManagement" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO dispatch_management (orderid, vehicleid, driverid, task)
+        VALUES (#{orderid}, #{vehicleid}, #{driverid}, #{task})
+    </insert>
+    
+    <update id="update" parameterType="com.logistics.entity.DispatchManagement">
+        UPDATE dispatch_management
+        SET orderid = #{orderid},
+            vehicleid = #{vehicleid},
+            driverid = #{driverid},
+            task = #{task}
+        WHERE id = #{id}
+    </update>
+    
+    <delete id="deleteById">
+        DELETE FROM dispatch_management WHERE id = #{id}
+    </delete>
+</mapper>

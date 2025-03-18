@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>车辆管理 - 物流管理系统</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="/logistics/css/common.css">
+    <style>
+        /* 车辆列表特定样式 */
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-dark sticky-top shadow">
+        <a class="navbar-brand col-md-3 col-lg-2 mr-0 px-3" href="#">
+            <i class="fas fa-truck-loading mr-2"></i>物流管理系统
+        </a>
+        <button class="navbar-toggler position-absolute d-md-none collapsed" type="button" data-toggle="collapse" data-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <ul class="navbar-nav px-3 ml-auto">
+            <li class="nav-item text-nowrap">
+                <a class="nav-link text-white" href="/logistics/user/logout">
+                    <i class="fas fa-sign-out-alt mr-1"></i>退出登录
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+                <div class="sidebar-sticky pt-3">
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/logistics/">
+                                <i class="fas fa-home"></i> 首页
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/logistics/order/list">
+                                <i class="fas fa-clipboard-list"></i> 订单管理
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/logistics/dispatch/list">
+                                <i class="fas fa-truck"></i> 调度管理
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" href="/logistics/vehicle/list">
+                                <i class="fas fa-car"></i> 车辆管理
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/logistics/user/list">
+                                <i class="fas fa-users"></i> 用户管理
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center page-header">
+                    <h1 class="page-title"><i class="fas fa-car mr-2"></i>车辆管理</h1>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <button type="button" class="btn btn-sm btn-outline-primary" data-toggle="modal" data-target="#addVehicleModal">
+                            <i class="fas fa-plus"></i> 新增车辆
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-striped table-sm">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>车牌号</th>
+                                <th>车型</th>
+                                <th>载重(吨)</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="vehicle : ${vehicles}">
+                                <td th:text="${vehicle.id}">1</td>
+                                <td th:text="${vehicle.licensePlate}">京A12345</td>
+                                <td th:text="${vehicle.model}">卡车型号A</td>
+                                <td th:text="${vehicle.loadCapacity}">5.00</td>
+                                <td>
+                                    <div class="btn-group">
+                                        <button class="btn btn-sm btn-outline-secondary edit-vehicle-btn" data-toggle="modal" data-target="#editVehicleModal"
+                                            th:data-id="${vehicle.id}" 
+                                            th:data-plate="${vehicle.licensePlate}" 
+                                            th:data-model="${vehicle.model}" 
+                                            th:data-capacity="${vehicle.loadCapacity}">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger delete-vehicle-btn" th:data-id="${vehicle.id}">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- 添加车辆模态框 -->
+    <div class="modal fade" id="addVehicleModal" tabindex="-1" aria-labelledby="addVehicleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addVehicleModalLabel">新增车辆</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="addVehicleForm">
+                        <div class="form-group">
+                            <label for="licensePlate">车牌号</label>
+                            <input type="text" class="form-control" id="licensePlate" name="licensePlate" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="model">车型</label>
+                            <input type="text" class="form-control" id="model" name="model" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="loadCapacity">载重(吨)</label>
+                            <input type="number" step="0.01" class="form-control" id="loadCapacity" name="loadCapacity" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" onclick="addVehicle()">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 编辑车辆模态框 -->
+    <div class="modal fade" id="editVehicleModal" tabindex="-1" aria-labelledby="editVehicleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editVehicleModalLabel">编辑车辆</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="editVehicleForm">
+                        <input type="hidden" id="editId" name="id">
+                        <div class="form-group">
+                            <label for="editLicensePlate">车牌号</label>
+                            <input type="text" class="form-control" id="editLicensePlate" name="licensePlate" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="editModel">车型</label>
+                            <input type="text" class="form-control" id="editModel" name="model" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="editLoadCapacity">载重(吨)</label>
+                            <input type="number" step="0.01" class="form-control" id="editLoadCapacity" name="loadCapacity" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" onclick="updateVehicle()">保存更改</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // 编辑车辆按钮点击事件
+            $('.edit-vehicle-btn').on('click', function() {
+                const id = $(this).data('id');
+                const licensePlate = $(this).data('plate');
+                const model = $(this).data('model');
+                const loadCapacity = $(this).data('capacity');
+                
+                $('#editId').val(id);
+                $('#editLicensePlate').val(licensePlate);
+                $('#editModel').val(model);
+                $('#editLoadCapacity').val(loadCapacity);
+            });
+            
+            // 删除车辆按钮点击事件
+            $('.delete-vehicle-btn').on('click', function() {
+                const id = $(this).data('id');
+                deleteVehicle(id);
+            });
+        });
+    
+        function addVehicle() {
+            const vehicle = {
+                licensePlate: $('#licensePlate').val(),
+                model: $('#model').val(),
+                loadCapacity: $('#loadCapacity').val()
+            };
+            
+            $.ajax({
+                url: '/logistics/vehicle/add',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(vehicle),
+                success: function(response) {
+                    if (response.success) {
+                        alert('添加成功');
+                        $('#addVehicleModal').modal('hide');
+                        location.reload();
+                    } else {
+                        alert('添加失败');
+                    }
+                },
+                error: function() {
+                    alert('服务器错误');
+                }
+            });
+        }
+        
+        function updateVehicle() {
+            const vehicle = {
+                id: $('#editId').val(),
+                licensePlate: $('#editLicensePlate').val(),
+                model: $('#editModel').val(),
+                loadCapacity: $('#editLoadCapacity').val()
+            };
+            
+            $.ajax({
+                url: '/logistics/vehicle/edit',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(vehicle),
+                success: function(response) {
+                    if (response.success) {
+                        alert('更新成功');
+                        $('#editVehicleModal').modal('hide');
+                        location.reload();
+                    } else {
+                        alert('更新失败');
+                    }
+                },
+                error: function() {
+                    alert('服务器错误');
+                }
+            });
+        }
+        
+        function deleteVehicle(id) {
+            if (confirm('确定要删除该车辆吗？')) {
+                $.ajax({
+                    url: '/logistics/vehicle/delete/' + id,
+                    type: 'POST',
+                    success: function(response) {
+                        if (response.success) {
+                            alert('删除成功');
+                            location.reload();
+                        } else {
+                            alert('删除失败');
+                        }
+                    },
+                    error: function() {
+                        alert('服务器错误');
+                    }
+                });
+            }
+        }
+    </script>
+</body>
+</html>

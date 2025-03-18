@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.logistics.repository.OrderRepository">
+    <resultMap id="orderResultMap" type="com.logistics.entity.Order">
+        <id property="id" column="id"/>
+        <result property="userid" column="userid"/>
+        <result property="vehicleid" column="vehicleid"/>
+        <result property="orderStatus" column="order_status"/>
+        <result property="creationTime" column="creation_time"/>
+        <result property="username" column="username"/>
+        <result property="licensePlate" column="license_plate"/>
+    </resultMap>
+    
+    <select id="findAll" resultMap="orderResultMap">
+        SELECT * FROM `order`
+    </select>
+    
+    <select id="findAllWithDetails" resultMap="orderResultMap">
+        SELECT o.*, u.username, v.license_plate
+        FROM `order` o
+        LEFT JOIN user u ON o.userid = u.id
+        LEFT JOIN vehicle v ON o.vehicleid = v.id
+        ORDER BY o.creation_time DESC
+    </select>
+    
+    <select id="findById" resultMap="orderResultMap">
+        SELECT o.*, u.username, v.license_plate
+        FROM `order` o
+        LEFT JOIN user u ON o.userid = u.id
+        LEFT JOIN vehicle v ON o.vehicleid = v.id
+        WHERE o.id = #{id}
+    </select>
+    
+    <insert id="insert" parameterType="com.logistics.entity.Order" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO `order` (userid, vehicleid, order_status, creation_time)
+        VALUES (#{userid}, #{vehicleid}, #{orderStatus}, NOW())
+    </insert>
+    
+    <update id="update" parameterType="com.logistics.entity.Order">
+        UPDATE `order`
+        SET userid = #{userid},
+            vehicleid = #{vehicleid},
+            order_status = #{orderStatus}
+        WHERE id = #{id}
+    </update>
+    
+    <update id="updateStatus">
+        UPDATE `order`
+        SET order_status = #{orderStatus}
+        WHERE id = #{id}
+    </update>
+    
+    <delete id="deleteById">
+        DELETE FROM `order` WHERE id = #{id}
+    </delete>
+</mapper>

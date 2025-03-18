@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>订单管理 - 物流管理系统</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="/logistics/css/common.css">
+    <style>
+        /* 订单列表特定样式 */
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-dark sticky-top shadow">
+        <a class="navbar-brand col-md-3 col-lg-2 mr-0 px-3" href="#">
+            <i class="fas fa-truck-loading mr-2"></i>物流管理系统
+        </a>
+        <button class="navbar-toggler position-absolute d-md-none collapsed" type="button" data-toggle="collapse" data-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <ul class="navbar-nav px-3 ml-auto">
+            <li class="nav-item text-nowrap">
+                <a class="nav-link text-white" href="/logistics/user/logout">
+                    <i class="fas fa-sign-out-alt mr-1"></i>退出登录
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+                <div class="sidebar-sticky pt-3">
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/logistics/">
+                                <i class="fas fa-home"></i> 首页
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" href="/logistics/order/list">
+                                <i class="fas fa-clipboard-list"></i> 订单管理
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/logistics/dispatch/list">
+                                <i class="fas fa-truck"></i> 调度管理
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/logistics/vehicle/list">
+                                <i class="fas fa-car"></i> 车辆管理
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/logistics/user/list">
+                                <i class="fas fa-users"></i> 用户管理
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center page-header">
+                    <h1 class="page-title"><i class="fas fa-clipboard-list mr-2"></i>订单管理</h1>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <a href="/logistics/order/add" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-plus"></i> 新增订单
+                        </a>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-striped table-sm">
+                        <thead>
+                            <tr>
+                                <th>订单ID</th>
+                                <th>客户</th>
+                                <th>车辆</th>
+                                <th>状态</th>
+                                <th>创建时间</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="order : ${orders}">
+                                <td th:text="${order.id}">1</td>
+                                <td th:text="${order.username}">管理员</td>
+                                <td th:text="${order.licensePlate}">京A12345</td>
+                                <td>
+                                    <span th:if="${order.orderStatus == 'pending'}" class="badge badge-warning">待处理</span>
+                                    <span th:if="${order.orderStatus == 'assigned'}" class="badge badge-info">已分配</span>
+                                    <span th:if="${order.orderStatus == 'in_transit'}" class="badge badge-primary">运输中</span>
+                                    <span th:if="${order.orderStatus == 'delivered'}" class="badge badge-success">已交付</span>
+                                    <span th:if="${order.orderStatus == 'canceled'}" class="badge badge-danger">已取消</span>
+                                </td>
+                                <td th:text="${#dates.format(order.creationTime, 'yyyy-MM-dd HH:mm')}">2025-03-19 10:00</td>
+                                <td>
+                                    <div class="btn-group">
+                                        <a th:href="@{'/order/edit/' + ${order.id}}" class="btn btn-sm btn-outline-secondary">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <button class="btn btn-sm btn-outline-danger delete-order-btn" th:data-id="${order.id}">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                        <div class="dropdown">
+                                            <button class="btn btn-sm btn-outline-info dropdown-toggle" type="button" data-toggle="dropdown">
+                                                状态
+                                            </button>
+                                            <div class="dropdown-menu">
+                                                <a class="dropdown-item status-update" href="#" th:data-id="${order.id}" data-status="pending">待处理</a>
+                                                <a class="dropdown-item status-update" href="#" th:data-id="${order.id}" data-status="assigned">已分配</a>
+                                                <a class="dropdown-item status-update" href="#" th:data-id="${order.id}" data-status="in_transit">运输中</a>
+                                                <a class="dropdown-item status-update" href="#" th:data-id="${order.id}" data-status="delivered">已交付</a>
+                                                <a class="dropdown-item status-update" href="#" th:data-id="${order.id}" data-status="canceled">已取消</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // 删除订单按钮点击事件
+            $('.delete-order-btn').on('click', function() {
+                const id = $(this).data('id');
+                deleteOrder(id);
+            });
+            
+            // 状态更新点击事件
+            $('.status-update').on('click', function() {
+                const id = $(this).data('id');
+                const status = $(this).data('status');
+                updateStatus(id, status);
+            });
+        });
+        
+        function deleteOrder(id) {
+            if (confirm('确定要删除该订单吗？')) {
+                $.ajax({
+                    url: '/logistics/order/delete/' + id,
+                    type: 'POST',
+                    success: function(response) {
+                        if (response.success) {
+                            alert('删除成功');
+                            location.reload();
+                        } else {
+                            alert('删除失败');
+                        }
+                    },
+                    error: function() {
+                        alert('服务器错误');
+                    }
+                });
+            }
+        }
+        
+        function updateStatus(id, status) {
+            $.ajax({
+                url: '/logistics/order/status/' + id,
+                type: 'POST',
+                data: {
+                    status: status
+                },
+                success: function(response) {
+                    if (response.success) {
+                        alert('状态更新成功');
+                        location.reload();
+                    } else {
+                        alert('状态更新失败');
+                    }
+                },
+                error: function() {
+                    alert('服务器错误');
+                }
+            });
+        }
+    </script>
+</body>
+</html>
