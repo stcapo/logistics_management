@@ -283,13 +283,87 @@
                     </button>
                 </form>
                 <div class="form-footer">
-                     2025 物流管理调度系统 - springboot框架编写
+                    <div class="d-flex justify-content-between mb-3">
+                        <a href="#" id="register-link" class="text-primary"><i class="fas fa-user-plus mr-1"></i>注册新账户</a>
+                        <a href="#" id="forgot-password-link" class="text-primary"><i class="fas fa-key mr-1"></i>忘记密码</a>
+                    </div>
+                    2025 物流管理调度系统 - springboot框架编写
                 </div>
             </div>
         </div>
     </div>
 
     <!-- 浮动图标 -->
+    <!-- 注册模态框 -->
+    <div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="registerModalLabel"><i class="fas fa-user-plus mr-2"></i>注册新账户</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-danger" id="register-error" style="display: none;"></div>
+                    <form id="registerForm">
+                        <div class="form-group">
+                            <label for="register-username"><i class="fas fa-user mr-2"></i>用户名</label>
+                            <input type="text" id="register-username" name="username" class="form-control" placeholder="请输入用户名" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="register-password"><i class="fas fa-lock mr-2"></i>密码</label>
+                            <input type="password" id="register-password" name="password" class="form-control" placeholder="请输入密码" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="register-confirm-password"><i class="fas fa-lock mr-2"></i>确认密码</label>
+                            <input type="password" id="register-confirm-password" name="confirmPassword" class="form-control" placeholder="请再次输入密码" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" id="register-button"><i class="fas fa-user-plus mr-2"></i>注册</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 忘记密码模态框 -->
+    <div class="modal fade" id="forgotPasswordModal" tabindex="-1" aria-labelledby="forgotPasswordModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-warning">
+                    <h5 class="modal-title" id="forgotPasswordModalLabel"><i class="fas fa-key mr-2"></i>重置密码</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-danger" id="reset-error" style="display: none;"></div>
+                    <form id="resetPasswordForm">
+                        <div class="form-group">
+                            <label for="reset-username"><i class="fas fa-user mr-2"></i>用户名</label>
+                            <input type="text" id="reset-username" name="username" class="form-control" placeholder="请输入用户名" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="reset-password"><i class="fas fa-lock mr-2"></i>新密码</label>
+                            <input type="password" id="reset-password" name="password" class="form-control" placeholder="请输入新密码" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="reset-confirm-password"><i class="fas fa-lock mr-2"></i>确认新密码</label>
+                            <input type="password" id="reset-confirm-password" name="confirmPassword" class="form-control" placeholder="请再次输入新密码" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-warning" id="reset-button"><i class="fas fa-key mr-2"></i>重置密码</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="icon-container">
         <i class="fas fa-truck floating-icon"></i>
         <i class="fas fa-shipping-fast floating-icon"></i>
@@ -305,6 +379,18 @@
                 $(this).parent().find('label').addClass('text-primary');
             }).blur(function() {
                 $(this).parent().find('label').removeClass('text-primary');
+            });
+            
+            // 打开注册模态框
+            $('#register-link').click(function(e) {
+                e.preventDefault();
+                $('#registerModal').modal('show');
+            });
+            
+            // 打开忘记密码模态框
+            $('#forgot-password-link').click(function(e) {
+                e.preventDefault();
+                $('#forgotPasswordModal').modal('show');
             });
 
             // 登录表单提交
@@ -367,6 +453,106 @@
                 }
                 .shake { animation: shake 0.5s ease-in-out; }
             `).appendTo('head');
+            
+            // 注册表单提交
+            $('#register-button').click(function() {
+                const username = $('#register-username').val();
+                const password = $('#register-password').val();
+                const confirmPassword = $('#register-confirm-password').val();
+                
+                // 验证表单
+                if (!username || !password || !confirmPassword) {
+                    $('#register-error').text('请填写所有字段').slideDown();
+                    return;
+                }
+                
+                if (password !== confirmPassword) {
+                    $('#register-error').text('两次输入的密码不一致').slideDown();
+                    return;
+                }
+                
+                // 按钮加载状态
+                const $btn = $(this).html('<i class="fas fa-spinner fa-spin mr-2"></i>注册中...');
+                $btn.prop('disabled', true);
+                
+                // 发送请求
+                $.ajax({
+                    url: '/logistics/user/register',
+                    type: 'POST',
+                    data: {
+                        username: username,
+                        password: password
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            $('#registerModal').modal('hide');
+                            alert('注册成功，请登录');
+                            $('#registerForm')[0].reset();
+                        } else {
+                            $('#register-error').text(response.message).slideDown();
+                        }
+                        // 恢复按钮状态
+                        $btn.html('<i class="fas fa-user-plus mr-2"></i>注册');
+                        $btn.prop('disabled', false);
+                    },
+                    error: function() {
+                        $('#register-error').text('服务器错误，请稍后再试').slideDown();
+                        // 恢复按钮状态
+                        $btn.html('<i class="fas fa-user-plus mr-2"></i>注册');
+                        $btn.prop('disabled', false);
+                    }
+                });
+            });
+            
+            // 重置密码表单提交
+            $('#reset-button').click(function() {
+                const username = $('#reset-username').val();
+                const password = $('#reset-password').val();
+                const confirmPassword = $('#reset-confirm-password').val();
+                
+                // 验证表单
+                if (!username || !password || !confirmPassword) {
+                    $('#reset-error').text('请填写所有字段').slideDown();
+                    return;
+                }
+                
+                if (password !== confirmPassword) {
+                    $('#reset-error').text('两次输入的密码不一致').slideDown();
+                    return;
+                }
+                
+                // 按钮加载状态
+                const $btn = $(this).html('<i class="fas fa-spinner fa-spin mr-2"></i>重置中...');
+                $btn.prop('disabled', true);
+                
+                // 发送请求
+                $.ajax({
+                    url: '/logistics/user/resetPassword',
+                    type: 'POST',
+                    data: {
+                        username: username,
+                        password: password
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            $('#forgotPasswordModal').modal('hide');
+                            alert('密码重置成功，请登录');
+                            $('#resetPasswordForm')[0].reset();
+                        } else {
+                            $('#reset-error').text(response.message).slideDown();
+                        }
+                        // 恢复按钮状态
+                        $btn.html('<i class="fas fa-key mr-2"></i>重置密码');
+                        $btn.prop('disabled', false);
+                    },
+                    error: function() {
+                        $('#reset-error').text('服务器错误，请稍后再试').slideDown();
+                        // 恢复按钮状态
+                        $btn.html('<i class="fas fa-key mr-2"></i>重置密码');
+                        $btn.prop('disabled', false);
+                    }
+                });
+            });
         });
     </script>
 </body>

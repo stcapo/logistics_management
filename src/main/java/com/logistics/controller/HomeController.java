@@ -28,11 +28,6 @@ public class HomeController {
     
     @GetMapping("/")
     public String home(HttpSession session, Model model) {
-        // Check if user is logged in
-        if (session.getAttribute("currentUser") == null) {
-            return "redirect:/user/login";
-        }
-        
         // Get dashboard data
         List<Order> recentOrders = orderService.findAllWithDetails();
         List<User> users = userService.findAll();
@@ -49,5 +44,10 @@ public class HomeController {
     @GetMapping("/index")
     public String index() {
         return "redirect:/";
+    }
+    
+    @GetMapping("/welcome")
+    public String welcome() {
+        return "welcome";
     }
 }

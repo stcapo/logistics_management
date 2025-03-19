@@ -92,4 +92,59 @@ public class UserController {
         session.invalidate();
         return "redirect:/user/login";
     }
+    
+    @PostMapping("/register")
+    @ResponseBody
+    public Map<String, Object> register(@RequestParam String username, 
+                                       @RequestParam String password) {
+        Map<String, Object> result = new HashMap<>();
+        
+        // 检查用户名是否已存在
+        User existingUser = userService.findByUsername(username);
+        if (existingUser != null) {
+            result.put("success", false);
+            result.put("message", "用户名已存在");
+            return result;
+        }
+        
+        // 创建新用户
+        User newUser = new User();
+        newUser.setUsername(username);
+        newUser.setPasswd(password);
+        
+        boolean success = userService.insert(newUser);
+        
+        result.put("success", success);
+        if (!success) {
+            result.put("message", "注册失败，请稍后再试");
+        }
+        
+        return result;
+    }
+    
+    @PostMapping("/resetPassword")
+    @ResponseBody
+    public Map<String, Object> resetPassword(@RequestParam String username, 
+                                             @RequestParam String password) {
+        Map<String, Object> result = new HashMap<>();
+        
+        // 查找用户
+        User user = userService.findByUsername(username);
+        if (user == null) {
+            result.put("success", false);
+            result.put("message", "用户不存在");
+            return result;
+        }
+        
+        // 更新密码
+        user.setPasswd(password);
+        boolean success = userService.update(user);
+        
+        result.put("success", success);
+        if (!success) {
+            result.put("message", "密码重置失败，请稍后再试");
+        }
+        
+        return result;
+    }
 }
